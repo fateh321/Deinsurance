@@ -3,9 +3,8 @@
 pragma solidity >=0.7.0 <0.9.0;
 
 interface IEvent {
-    function triggger(bool) external returns (bool);
-    function updateInsurance(address, address) external;
-    function updatePremiums(address, address) external;
-    function getBalances() external view returns (uint, uint);
-    function claimInsurance() external;
+    function mint(address) external;
+    function returnAsset(address, uint) external;
+    function trigger() external returns (bool);
+    function setEventStatus(bool) external;
 }

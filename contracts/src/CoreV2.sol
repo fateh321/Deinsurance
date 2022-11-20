@@ -2,6 +2,8 @@
 
 pragma solidity >=0.7.0 <0.9.0;
 
+import "@openzeppelin/contracts@4.8.0/access/Ownable.sol";
+
 import "./interfaces/IEvent.sol";
 import "./Event.sol";
 import "./libraries/TransferHelper.sol";
@@ -10,7 +12,7 @@ import "./libraries/TransferHelper.sol";
  * @title Core
  * @dev Implements the core functionality of the insurance protocol
  */
-contract Core {
+contract Core is Ownable{
 
     // struct EventStruct {
     //     bytes32 name; // the name of the insurance event
@@ -18,17 +20,17 @@ contract Core {
     //     address eventAddress; // the address of the smart contract implementing the event
     // }
 
-    address private owner;
-    bool private coreStatus; //the freeze status of the core contract; no insurance related actions are possible; contracts can still be triggered
+    //address private owner;
+    bool public coreStatus; //the freeze status of the core contract; no insurance related actions are possible; contracts can still be triggered
     bool public platformStatus; //the freeze status of the whole platform; contracts cannot be triggered
 //    EventStruct[] public events; //not needed, address provided by user
 
-    /** 
-     * @dev Sets the owner of the contract
-     */
-    constructor() {
-        owner = msg.sender;
-    }
+    // /** 
+    //  * @dev Sets the owner of the contract
+    //  */
+    // constructor() {
+    //     owner = msg.sender;
+    // }
 
     /** 
      * @dev Enable entities to give assets in return for insurance tokens
@@ -60,23 +62,23 @@ contract Core {
         Event evt = Event(eventAddress);
         require(!evt.dormant(), "Contract is dormant; no longer possible to burn.");
 
-        address insuredToken = evt.insuredToken();
-        address providerToken = evt.providerToken();
+        // address insuredToken = evt.insuredToken();
+        // address providerToken = evt.providerToken();
 
         //ideally these are called only by the owner (event), o/w tokens can be destroyed without
-        //changing the totalAsset counter of the event. Although, they have no incentive for this
-        insuredToken.burnFrom(msg.sender, amount*10);
-        providerToken.burnFrom(msg.sender, amount*10);
+        //changing the totalAsset counter of the event and without returning the asset to the user.
+        //Although, becasue of this, they have no incentive for doing it. Unless someone is messing.
+        // insuredToken.burnFrom(msg.sender, amount*10);
+        // providerToken.burnFrom(msg.sender, amount*10);
         //!!!!!!!!!!!!!!!!!!
         
-        evt.returnAsset(msg.sender);
+        evt.returnAsset(msg.sender, amount);
 
     }
 
     /** 
      * @dev Enable entities to get insurnace tokens for some event
      * @param eventAddress the event for which insurance is provided
-     * @param amount the amount if the provided insurance
      */
     function redeemPositions(address eventAddress) external {
         // require(!platformStatus, "Insurance platfom is freezed; method currently unavailable.");
@@ -98,12 +100,11 @@ contract Core {
      * @param _duration the duration of teh contract in seconds
      * @param _oracleAddress the oracle that provided information on the status of the event
      * @param _assetAddress the token representing the staked asset
-     * @param _settleRation the ratio of assets between the insurance providing and purchasing sides
+     * @param _settleRatio the ratio of assets between the insurance providing and purchasing sides
      */
     function deployEvent(bytes32 _name, uint _duration, address _oracleAddress, address _assetAddress, uint _settleRatio) external returns (address eventAddress) {
         bytes memory bytecode = type(Event).creationCode;
         bytes32 _salt = keccak256(abi.encodePacked(_name, _duration, _oracleAddress, _assetAddress, _settleRatio));
-        address eventAddress;
         eventAddress = new Event{salt: _salt}(_name, _duration, _oracleAddress, _assetAddress, _settleRatio);
                 
         // events.push(EventStruct({
@@ -115,15 +116,16 @@ contract Core {
         //to the eventAddress to find out oracel, asset, and duration?
     }
 
-    function freezeCore() onlyOwner {
-        _;
+    function setCoreStatus(bool status) external onlyOwner {
+        coreStatus = status;
     }
 
-    function freezePlatform() onlyOwner {
-        _;
+    function setPlatformStatus(bool status) external onlyOwner {
+        platformStatus = status;
     }
 
-    function freezeEvent(address eventAddress) onlyOwner {
-        _;
+    function setEventStatus(bool status, address eventAddress) external onlyOwner {
+        Event evt = Event(eventAddress);
+        evt.setEventStatus(status);
     }
 }
