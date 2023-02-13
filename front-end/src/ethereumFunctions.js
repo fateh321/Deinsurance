@@ -73,16 +73,21 @@ export async function getBalanceAndSymbol(
   console.log(eventAddress);
   //try {
     const event = new Contract(eventAddress, EVENT.abi, signer);
-    const tokenAddress = event.insuredToken();
+    const insuranceTokenAddress = event.insuredToken();
+    const providerTokenAddress = event.providerToken();
 
-    const token = new Contract(tokenAddress, INSTOKEN.abi, signer);
-    const balanceRaw = await token.balanceOf(accountAddress);
-    const symbol = await token.symbol();
+    let token = new Contract(insuranceTokenAddress, INSTOKEN.abi, signer);
+    const insuranceBalanceRaw = await token.balanceOf(accountAddress);
+    const insuranceSymbol = await token.symbol();
 
-    console.log("balance: ", ethers.utils.formatEther(balanceRaw), symbol);
+    token =  new Contract(providerTokenAddress, INSTOKEN.abi, signer);
+    const providerBalanceRaw = await token.balanceOf(accountAddress);
+    const providerSymbol = await token.symbol();
+
+    console.log("balance: ", ethers.utils.formatEther(insuranceBalanceRaw), insuranceSymbol);
     return {
-      balance: ethers.utils.formatEther(balanceRaw),
-      symbol: symbol,
+      balances: [ethers.utils.formatEther(insuranceBalanceRaw), ethers.utils.formatEther(providerBalanceRaw)],
+      symbols: [insuranceSymbol, providerSymbol]
     };
   //} catch (err) {
  //   return false;

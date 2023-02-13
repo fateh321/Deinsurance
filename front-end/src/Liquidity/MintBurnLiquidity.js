@@ -123,12 +123,11 @@ function MintBurnLiquid(props) {
         name: undefined,
     });
 
-    const [option2, setOption2] = React.useState({
-        isCoin: false,
-        isInsurer: false,
-        address: undefined,
-        balance: undefined,
-        symbol: undefined,
+    const [balances, setBalances] = React.useState({
+        insurance: undefined,
+        insuranceSysmbol: undefined,
+        coverage: undefined,
+        coverageSymbol: undefined,
   });
 
 
@@ -403,9 +402,11 @@ function MintBurnLiquid(props) {
             if (account) {
                 getBalanceAndSymbol(account, eventAddress, provider, signer).then(
                     (data) => {
-                        setOption2({
-                            balance: data.balance,
-                            symbol: data.symbol,
+                        setBalances({
+                            insurance: data.balances[0],
+                            insuranceSymbol: data.symbols[0],
+                            coverage: data.balances[1],
+                            coverageSymbol: data.symbols[1]
                         });
                     }
                 );
@@ -504,11 +505,14 @@ function MintBurnLiquid(props) {
                         <hr className={classes.hr} />
 
                         {/* Balance Display */}
-                        <Typography variant="h6">Your Balance</Typography>
+                        <Typography variant="h6">Your Balances</Typography>
 
                         <Typography variant="body1" className={classes.balance}>
-                            {formatBalance(option2.balance, option2.symbol)}
+                            {formatBalance(balances.insurance, balances.insuranceSymbol)}
+                            <br/>                      
+                            {formatBalance(balances.coverage, balances.coverageSymbol)}
                         </Typography>
+
 
 
                         <hr className={classes.hr} />
