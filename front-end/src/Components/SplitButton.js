@@ -104,7 +104,7 @@ export default function SplitButton(props) {
                         {/*<Box display="block">*/}
                         <Paper
                             variant={"elevation"}
-                            sx={{ width: 120 }}
+                            sx={{ width: 140 }}
                         >
                             <ClickAwayListener onClickAway={handleClose}>
                                 <MenuList id="split-button-menu" autoFocusItem dense>
@@ -116,8 +116,13 @@ export default function SplitButton(props) {
                                             // disabled={index === 2}
                                             selected={index === selectedIndex}
                                             onClick={(event) => handleMenuItemClick(event, index)}
+                                            sx={{ 
+                                                '&.MuiButtonBase-root': {
+                                                  display: 'flex',
+                                                },
+                                            }}
                                         >
-                                            <ListItemText sx={{ ml:2 }}> {option} </ListItemText>
+                                            <ListItemText sx={{ ml:4}}> {option} </ListItemText>
                                         </MenuItem>
                                     ))}
 
