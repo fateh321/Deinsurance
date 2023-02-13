@@ -506,7 +506,7 @@ function CoinSwapper(props) {
 
                 <Typography variant="body1" className={classes.balance}>
                   {/*TODO*/}
-                  {formatBalance(option2.balance, "USDC")}
+                  {formatBalance(field4Value*option2.balance, "USDC")}
                 </Typography>
 
 
